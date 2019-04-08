@@ -25,7 +25,7 @@ def get_dataset():
     label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(labels, tf.int64))
 
     image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
-    return image_label_ds
+    return image_label_ds, len(labels)
 
 
 def load_images(startpath):
