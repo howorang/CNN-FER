@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 
 label_dict = {
     0: "neutral",
@@ -12,6 +13,19 @@ label_dict = {
     6: "sadness",
     7: "surprise"
 }
+
+
+# tf.enable_eager_execution()
+def get_dataset():
+    labels, paths = load_images("data/Emotion")
+
+    path_ds = tf.data.Dataset.from_tensor_slices(paths)
+    image_ds = path_ds.map(load_and_preprocess_image)
+
+    label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(labels, tf.int64))
+
+    image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
+    return image_label_ds
 
 
 def load_images(startpath):
@@ -45,13 +59,11 @@ def preprocess_image(image):
     image /= 255.0  # normalize to [0,1] range
     return image
 
-
-labels, paths = load_images("data/Emotion")
-
-path_ds = tf.data.Dataset.from_tensor_slices(paths)
-image_ds = path_ds.map(load_and_preprocess_image)
-
-label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(labels, tf.int64))
-
-image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
-
+# plt.figure(figsize=(8, 8))
+# for n, image in enumerate(image_ds.take(4)):
+#     plt.subplot(2, 2, n + 1)
+#     plt.imshow(image)
+#     plt.grid(False)
+#     plt.xticks([])
+#     plt.yticks([])
+#     plt.show()
