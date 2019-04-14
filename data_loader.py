@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+import numpy as np
 
 # import matplotlib.pyplot as plt
 
@@ -17,27 +18,21 @@ label_dict = {
 
 # tf.enable_eager_execution()
 def get_dataset():
-    labels, paths = load_images("data/Emotion")
-
-    path_ds = tf.data.Dataset.from_tensor_slices(paths)
-    image_ds = path_ds.map(load_and_preprocess_image)
-
-    label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(labels, tf.int64))
-
-    image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
-    return image_label_ds, len(labels)
+    labels, imgs = load_images("data/Emotion")
+    ds = tf.data.Dataset.from_tensor_slices((imgs, labels))
+    return ds, len(labels)
 
 
 def load_images(startpath):
-    img_paths = []
+    imgs = []
     img_labels = []
     for paths, dirs, files in os.walk(startpath):
         for f in files:
             fullpath = os.path.join(paths, f)
             label, path = get_label_path(fullpath)
             img_labels.append(label)
-            img_paths.append(path)
-    return img_labels, img_paths
+            imgs.append(load_and_preprocess_image(path))
+    return img_labels, imgs
 
 
 def get_label_path(path):

@@ -20,23 +20,28 @@ validation_set_count = int(VAL_SIZE * length)
 val_dataset = test_dataset.skip(validation_set_count)
 test_set_count = int(TST_SIZE * length)
 test_dataset = test_dataset.take(test_set_count)
+
 model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(192, 3)),
+    keras.layers.Flatten(),
     keras.layers.Dense(128, activation=tf.nn.relu),
-    keras.layers.Dense(10, activation=tf.nn.softmax)
+    keras.layers.Dense(8, activation=tf.nn.softmax)
 ])
 model.compile(optimizer='adam',
-              loss='binary_crossentropy',
-              metrics=['acc'])
-batches_count = int(length / 20)
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-history = model.fit(x=train_dataset.make_one_shot_iterator(),
+test = train_dataset.make_one_shot_iterator().get_next()
+
+batch_size = 80
+steps_per_epoch_val = int(train_set_count / batch_size)
+history = model.fit(train_dataset.make_one_shot_iterator(),
                     validation_data=val_dataset.make_one_shot_iterator(),
-                    epochs=40,
-                    batch_size=20,
+                    epochs=10,
+                    batch_size=batch_size,
                     verbose=1,
-                    steps_per_epoch=1,
-                    validation_steps=1)
+                    steps_per_epoch=steps_per_epoch_val,
+                    validation_steps=2)
+
 history_dict = history.history
 history_dict.keys()
 
