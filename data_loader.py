@@ -1,5 +1,7 @@
 import os
 import tensorflow as tf
+import cv2
+import numpy as np
 
 label_dict = {
     0: "neutral",
@@ -11,6 +13,8 @@ label_dict = {
     6: "sadness",
     7: "surprise"
 }
+
+faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 
 def get_dataset():
@@ -45,12 +49,19 @@ def get_label_path(path):
 
 
 def load_and_preprocess_image(path):
-    image = tf.read_file(path)
-    return preprocess_image(image)
+    return preprocess_image(path)
 
 
 def preprocess_image(image):
-    image = tf.image.decode_jpeg(image, channels=1)
-    image = tf.image.resize_images(image, [192, 192])
-    image /= 255.0  # normalize to [0,1] range
+    image = cv2.imread(image)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = faceCascade.detectMultiScale(gray, 1.1, 3, minSize=(100, 100))
+
+
+    for (x, y, w, h) in faces:
+        crop_img = image[y:y + h, x:x + w]
+        cv2.imshow('image', crop_img)
+        np_image_data = np.asarray(crop_img)
+
+        tf.image.decode_image(np_image_data)
     return image
