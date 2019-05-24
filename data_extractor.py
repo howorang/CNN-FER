@@ -67,8 +67,18 @@ def rotate(fullpath, source_path, dest_path):
     cv2.imwrite(fullpath.replace(source_path, dest_path).replace(".png", "_rotated.png"), dest_image)
 
 
+def translate(fullpath, source_path, dest_path):
+    x = random.randint(0, 10)
+    y = random.randint(0, 10)
+    M = np.float32([[1, 0, x], [0, 1, y]])
+    source_image = cv2.imread(fullpath)
+    height, width, channels = source_image.shape
+    dst = cv2.warpAffine(source_image, M, (width, height))
+    cv2.imwrite(fullpath.replace(source_path, dest_path).replace(".png", "_translated.png"), dst)
+
 
 crop_faces("data/Emotion", "data/croped/")
 
 for_each_image(mirror, "data/croped", "data/mirrored")
 for_each_image(rotate, "data/croped", "data/rotated")
+for_each_image(translate, "data/croped", "data/translated")
