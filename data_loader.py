@@ -1,7 +1,5 @@
 import os
 import tensorflow as tf
-import cv2
-import numpy as np
 
 label_dict = {
     0: "neutral",
@@ -13,8 +11,6 @@ label_dict = {
     6: "sadness",
     7: "surprise"
 }
-
-faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 
 def get_dataset():
@@ -34,34 +30,37 @@ def load_images(startpath):
     for paths, dirs, files in os.walk(startpath):
         for f in files:
             fullpath = os.path.join(paths, f)
-            label, path = get_label_path(fullpath)
+            label, path, path2, path3, path4 = get_label_path(fullpath, f)
+            img_labels.append(label)
+            img_labels.append(label)
+            img_labels.append(label)
             img_labels.append(label)
             imgs.append(load_and_preprocess_image(path))
+            imgs.append(load_and_preprocess_image(path2))
+            imgs.append(load_and_preprocess_image(path3))
+            imgs.append(load_and_preprocess_image(path4))
     return img_labels, imgs
 
 
-def get_label_path(path):
-    image_path = path.replace('data/Emotion', 'data/cohn-kanade-images').replace('_emotion.txt', '.png')
+def get_label_path(path, filename):
+    image_path = '/data/output/' + filename.replace('_emotion.txt', '.png')
+    image_path_t = image_path.replace('.png', '_translated.png')
+    image_path_m = image_path.replace('.png', '_mirrored.png')
+    image_path_r = image_path.replace('.png', '_rotated.png')
+
     fp = open(path, "r")
     label = int(float(fp.readline()))
     fp.close()
-    return label, image_path
+    return label, image_path, image_path_m, image_path_r, image_path_t
 
 
 def load_and_preprocess_image(path):
-    return preprocess_image(path)
+    image = tf.read_file(path)
+    return preprocess_image(image)
 
 
 def preprocess_image(image):
-    image = cv2.imread(image)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faces = faceCascade.detectMultiScale(gray, 1.1, 3, minSize=(100, 100))
-
-
-    for (x, y, w, h) in faces:
-        crop_img = image[y:y + h, x:x + w]
-        cv2.imshow('image', crop_img)
-        np_image_data = np.asarray(crop_img)
-
-        tf.image.decode_image(np_image_data)
+    image = tf.image.decode_jpeg(image, channels=1)
+    image = tf.image.resize_images(image, [192, 192])
+    image /= 255.0  # normalize to [0,1] range
     return image

@@ -79,6 +79,6 @@ def translate(fullpath, source_path, dest_path):
 
 crop_faces("data/Emotion", "data/croped/")
 
-for_each_image(mirror, "data/croped", "data/mirrored")
-for_each_image(rotate, "data/croped", "data/rotated")
-for_each_image(translate, "data/croped", "data/translated")
+for_each_image(mirror, "data/croped", "data/output")
+for_each_image(rotate, "data/croped", "data/output")
+for_each_image(translate, "data/croped", "data/output")
