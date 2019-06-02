@@ -65,8 +65,8 @@ def preprocess_image(image):
 
 
 labels, images, length = get_dataset()
-labels = labels.repeat(10)
-images = images.repeat(10)
+labels = np.repeat(labels, 10, axis=0)
+images = np.repeat(images, 10, axis=0)
 length = length * 10
 print(length)
 VAL_SIZE = 0.15
