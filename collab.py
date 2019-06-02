@@ -65,6 +65,9 @@ def preprocess_image(image):
 
 
 labels, images, length = get_dataset()
+labels = labels.repeat(10)
+images = images.repeat(10)
+length = length * 10
 print(length)
 VAL_SIZE = 0.15
 TST_SIZE = 0.15
@@ -85,9 +88,10 @@ model.compile(optimizer='adam',
 history = model.fit(x=images,
                     y=labels,
                     validation_split=0.15,
-                    epochs=20,
+                    epochs=1000,
                     verbose=1,
-                    steps_per_epoch=batch_size)
+                    batch_size=32,
+                    shuffle=True)
 
 history_dict = history.history
 history_dict.keys()
