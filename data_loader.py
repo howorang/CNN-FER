@@ -43,7 +43,7 @@ def load_images(startpath):
 
 
 def get_label_path(path, filename):
-    image_path = '/data/output/' + filename.replace('_emotion.txt', '.png')
+    image_path = '\\data\\output\\' + filename.replace('_emotion.txt', '.png')
     image_path_t = image_path.replace('.png', '_translated.png')
     image_path_m = image_path.replace('.png', '_mirrored.png')
     image_path_r = image_path.replace('.png', '_rotated.png')
