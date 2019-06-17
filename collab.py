@@ -9,6 +9,8 @@ from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
 import datetime
 
+from sklearn.model_selection import train_test_split
+
 label_dict = {
     0: "neutral",
     1: "anger",
@@ -92,13 +94,11 @@ def get_model_memory_usage(batch_size, model):
 
 
 labels, images, length = get_dataset()
+
+images, X_test, labels, y_test = train_test_split(images, labels, test_size=0.15)
+
 labels = np.repeat(labels, 10, axis=0)
 images = np.repeat(images, 10, axis=0)
-length = length * 10
-print(length)
-VAL_SIZE = 0.15
-TST_SIZE = 0.15
-TRN_SIZE = 0.70
 
 batch_size = 20
 
@@ -160,16 +160,24 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-# history = model.fit(x=images,
-#                     y=labels,
-#                     validation_split=0.15,
-#                     epochs=90,
-#                     verbose=1,
-#                     batch_size=32,
-#                     shuffle=True,
-#                     callbacks=[tensorboard_callback])
-
 model.summary()
+
+history = model.fit(x=images,
+                    y=labels,
+                    validation_split=0.15,
+                    epochs=90,
+                    verbose=1,
+                    batch_size=32,
+                    shuffle=True,
+                    callbacks=[tensorboard_callback])
+
+model.evaluate(
+    x=X_test,
+    y=y_test,
+    batch_size=32,
+    verbose=1
+)
+
 
 print(get_model_memory_usage(32, model))
 
