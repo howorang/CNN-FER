@@ -7,6 +7,7 @@ import numpy as np
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
+import datetime
 
 label_dict = {
     0: "neutral",
@@ -63,6 +64,32 @@ def preprocess_image(image):
     arr = np.divide(arr, 255)
     return arr
 
+def get_model_memory_usage(batch_size, model):
+    import numpy as np
+    from keras import backend as K
+
+    shapes_mem_count = 0
+    for l in model.layers:
+        single_layer_mem = 1
+        for s in l.output_shape:
+            if s is None:
+                continue
+            single_layer_mem *= s
+        shapes_mem_count += single_layer_mem
+
+    trainable_count = np.sum([K.count_params(p) for p in set(model.trainable_weights)])
+    non_trainable_count = np.sum([K.count_params(p) for p in set(model.non_trainable_weights)])
+
+    number_size = 4.0
+    if K.floatx() == 'float16':
+         number_size = 2.0
+    if K.floatx() == 'float64':
+         number_size = 8.0
+
+    total_memory = number_size*(batch_size*shapes_mem_count + trainable_count + non_trainable_count)
+    gbytes = np.round(total_memory / (1024.0 ** 3), 3)
+    return gbytes
+
 
 labels, images, length = get_dataset()
 labels = np.repeat(labels, 10, axis=0)
@@ -73,25 +100,78 @@ VAL_SIZE = 0.15
 TST_SIZE = 0.15
 TRN_SIZE = 0.70
 
-
 batch_size = 20
 
+logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
+
 model = keras.Sequential([
-    keras.layers.Flatten(batch_size=batch_size),
-    keras.layers.Dense(128, activation=tf.nn.relu),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu',
+                        input_shape=(192, 192, 1)),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.MaxPooling2D(pool_size=(2, 2),
+                              padding='valid'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.MaxPooling2D(pool_size=(2, 2),
+                              padding='valid'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.MaxPooling2D(pool_size=(2, 2),
+                              padding='valid'),
+    keras.layers.Flatten(),
+    keras.layers.Dense(256, activation='relu'),
+    keras.layers.Dropout(0.5),
+    keras.layers.Dense(256, activation='relu'),
+    keras.layers.Dropout(0.5),
     keras.layers.Dense(8, activation=tf.nn.softmax)
 ])
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-history = model.fit(x=images,
-                    y=labels,
-                    validation_split=0.15,
-                    epochs=1000,
-                    verbose=1,
-                    batch_size=32,
-                    shuffle=True)
+# history = model.fit(x=images,
+#                     y=labels,
+#                     validation_split=0.15,
+#                     epochs=90,
+#                     verbose=1,
+#                     batch_size=32,
+#                     shuffle=True,
+#                     callbacks=[tensorboard_callback])
+
+model.summary()
+
+print(get_model_memory_usage(32, model))
 
 history_dict = history.history
 history_dict.keys()
