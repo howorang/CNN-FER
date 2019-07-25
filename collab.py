@@ -104,6 +104,7 @@ batch_size = 20
 
 logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
+print(logdir)
 
 model = keras.Sequential([
     keras.layers.Conv2D(filters=32,
@@ -147,8 +148,25 @@ model = keras.Sequential([
                         kernel_size=3,
                         strides=(1, 1),
                         activation='relu'),
+
     keras.layers.MaxPooling2D(pool_size=(2, 2),
                               padding='valid'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+    keras.layers.Conv2D(filters=32,
+                        kernel_size=3,
+                        strides=(1, 1),
+                        activation='relu'),
+
+    keras.layers.MaxPooling2D(pool_size=(2, 2),
+                              padding='valid'),
+    
     keras.layers.Flatten(),
     keras.layers.Dense(256, activation='relu'),
     keras.layers.Dropout(0.5),
@@ -171,7 +189,7 @@ history = model.fit(x=images,
                     shuffle=True,
                     callbacks=[tensorboard_callback])
 
-model.evaluate(
+test_scalar_loss = model.evaluate(
     x=X_test,
     y=y_test,
     batch_size=32,
