@@ -166,12 +166,11 @@ model = keras.Sequential([
 
     keras.layers.MaxPooling2D(pool_size=(2, 2),
                               padding='valid'),
-    
+
+    # first flatten
+    keras.layers.AveragePooling2D(pool_size=(6),
+                                  strides=None),
     keras.layers.Flatten(),
-    keras.layers.Dense(256, activation='relu'),
-    keras.layers.Dropout(0.5),
-    keras.layers.Dense(256, activation='relu'),
-    keras.layers.Dropout(0.5),
     keras.layers.Dense(8, activation=tf.nn.softmax)
 ])
 model.compile(optimizer='adam',
