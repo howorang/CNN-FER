@@ -1,15 +1,101 @@
 import datetime
+
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from tensorflow import keras
+
 import os
 
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from tensorflow import keras
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import load_img
+from keras.utils import to_categorical
+
 import numpy as np
+from keras_preprocessing.image import load_img
 
-from sklearn.model_selection import train_test_split
+IMAGE_PATH = "data/Emotion"
+OUTPUT_PATH = 'data/output/'
 
-from data_loader import get_dataset
-from utils import get_model_memory_usage
+
+def get_dataset():
+    labels, imgs = load_images(IMAGE_PATH)
+    length = len(labels)
+    return labels, imgs, length
+
+
+def load_images(startpath):
+    imgs = []
+    img_labels = []
+    for paths, dirs, files in os.walk(startpath):
+        for f in files:
+            fullpath = os.path.join(paths, f)
+            label, paths = get_label_path(fullpath, f)
+            for path in paths:
+                img_labels.append(to_categorical(label, 8))
+                imgs.append(load_and_preprocess_image(path))
+    return np.array(img_labels), np.array(imgs)
+
+
+def get_label_path(path, filename):
+    image_path = OUTPUT_PATH + filename.replace('_emotion.txt', '.png')
+    image_path_t = image_path.replace('.png', '_translated.png')
+    image_path_m = image_path.replace('.png', '_mirrored.png')
+    image_path_r = image_path.replace('.png', '_rotated.png')
+
+    fp = open(path, "r")
+    label = int(float(fp.readline()))
+    fp.close()
+    return label, [image_path, image_path_m, image_path_r, image_path_t]
+
+
+def load_and_preprocess_image(path):
+    image = load_img(path)
+    return preprocess_image(image)
+
+
+def preprocess_image(image):
+    image = image.convert('L')  # to grayscale
+    image = image.resize((192, 192))
+    arr = img_to_array(image)
+    arr = np.divide(arr, 255)
+    return arr
+
+
+def get_model_memory_usage(batch_size, model):
+    import numpy as np
+    from keras import backend as K
+
+    shapes_mem_count = 0
+    for l in model.layers:
+        single_layer_mem = 1
+        for s in l.output_shape:
+            if s is None:
+                continue
+            single_layer_mem *= s
+        shapes_mem_count += single_layer_mem
+
+    trainable_count = np.sum([K.count_params(p) for p in set(model.trainable_weights)])
+    non_trainable_count = np.sum([K.count_params(p) for p in set(model.non_trainable_weights)])
+
+    number_size = 4.0
+    if K.floatx() == 'float16':
+        number_size = 2.0
+    if K.floatx() == 'float64':
+        number_size = 8.0
+
+    total_memory = number_size * (batch_size * shapes_mem_count + trainable_count + non_trainable_count)
+    gbytes = np.round(total_memory / (1024.0 ** 3), 3)
+    return gbytes
+
+
+def predict_photo(photo_path, model, is_preprocessed):
+    image = load_img(photo_path)
+    if ~is_preprocessed:
+        image = preprocess_image(image)
+    prediction = model.predict(np.array([image]))
+    print(prediction)
+
 
 labels, images, length = get_dataset()
 
@@ -113,7 +199,6 @@ test_scalar_loss = model.evaluate(
     verbose=1
 )
 
-
 print(get_model_memory_usage(32, model))
 
 history_dict = history.history
@@ -136,7 +221,3 @@ plt.ylabel('Loss')
 plt.legend()
 
 plt.show()
-
-
-
-
