@@ -1,6 +1,5 @@
 import datetime
 
-import matplotlib.pyplot as plt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
@@ -14,14 +13,16 @@ from keras.utils import to_categorical
 import numpy as np
 from keras_preprocessing.image import load_img
 
+from hyperas import optim
+from hyperas.distributions import choice, uniform
+
 IMAGE_PATH = "data/Emotion"
 OUTPUT_PATH = 'data/output/'
 
 
 def get_dataset():
     labels, imgs = load_images(IMAGE_PATH)
-    length = len(labels)
-    return labels, imgs, length
+    return labels, imgs
 
 
 def load_images(startpath):
@@ -63,7 +64,6 @@ def preprocess_image(image):
 
 
 def get_model_memory_usage(batch_size, model):
-    import numpy as np
     from keras import backend as K
 
     shapes_mem_count = 0
@@ -97,7 +97,78 @@ def predict_photo(photo_path, model, is_preprocessed):
     print(prediction)
 
 
-labels, images, length = get_dataset()
+def create_model():
+    initial_size = 32
+    return keras.Sequential([
+        keras.layers.Conv2D(filters=initial_size,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu',
+                            input_shape=(192, 192, 1)),
+        keras.layers.Conv2D(filters=initial_size,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.MaxPooling2D(pool_size=(2, 2),
+                                  padding='valid'),
+        keras.layers.Conv2D(filters=initial_size * 2,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 2,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 2,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.MaxPooling2D(pool_size=(2, 2),
+                                  padding='valid'),
+        keras.layers.Conv2D(filters=initial_size * 4,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 4,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 4,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+
+        keras.layers.MaxPooling2D(pool_size=(2, 2),
+                                  padding='valid'),
+        keras.layers.Conv2D(filters=initial_size * 8,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 8,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+        keras.layers.Conv2D(filters=initial_size * 8,
+                            kernel_size=(3, 3),
+                            strides=(1, 1),
+                            activation='relu'),
+
+        keras.layers.MaxPooling2D(pool_size=(2, 2),
+                                  strides=(2, 2),
+                                  padding='valid'),
+
+        # first flatten
+        keras.layers.GlobalAveragePooling2D(),
+        keras.layers.Flatten(),
+        keras.layers.Dense(8, activation=tf.nn.softmax)
+    ])
+
+
+labels, images = get_dataset()
 
 images, X_test, labels, y_test = train_test_split(images, labels, test_size=0.15)
 
@@ -110,75 +181,7 @@ logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
 print(logdir)
 
-initial_size=32
-
-model = keras.Sequential([
-    keras.layers.Conv2D(filters=initial_size,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu',
-                        input_shape=(192, 192, 1)),
-    keras.layers.Conv2D(filters=initial_size,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.MaxPooling2D(pool_size=(2, 2),
-                              padding='valid'),
-    keras.layers.Conv2D(filters=initial_size * 2,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 2,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 2,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.MaxPooling2D(pool_size=(2, 2),
-                              padding='valid'),
-    keras.layers.Conv2D(filters=initial_size * 4,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 4,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 4,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-
-    keras.layers.MaxPooling2D(pool_size=(2, 2),
-                              padding='valid'),
-    keras.layers.Conv2D(filters=initial_size * 8,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 8,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-    keras.layers.Conv2D(filters=initial_size * 8,
-                        kernel_size=(3, 3),
-                        strides=(1, 1),
-                        activation='relu'),
-
-    keras.layers.MaxPooling2D(pool_size=(2, 2),
-                              strides=(2, 2),
-                              padding='valid'),
-
-    # first flatten
-    keras.layers.GlobalAveragePooling2D(),
-    keras.layers.Flatten(),
-    keras.layers.Dense(8, activation=tf.nn.softmax)
-])
+model = create_model()
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -200,26 +203,3 @@ test_scalar_loss = model.evaluate(
     batch_size=32,
     verbose=1
 )
-
-print(get_model_memory_usage(32, model))
-
-history_dict = history.history
-history_dict.keys()
-
-acc = history_dict['acc']
-val_acc = history_dict['val_acc']
-loss = history_dict['loss']
-val_loss = history_dict['val_loss']
-
-epochs = range(1, len(acc) + 1)
-
-# "bo" is for "blue dot"
-plt.plot(epochs, loss, 'bo', label='Training loss')
-# b is for "solid blue line"
-plt.plot(epochs, val_loss, 'b', label='Validation loss')
-plt.title('Training and validation loss')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-
-plt.show()

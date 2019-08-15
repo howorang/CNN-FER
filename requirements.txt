@@ -1,3 +1,5 @@
+numpy
+keras
 opencv-python
 matplotlib
 tensorflow
