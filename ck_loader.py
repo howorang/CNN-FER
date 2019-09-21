@@ -6,12 +6,13 @@ from keras.preprocessing.image import load_img
 from keras.utils import to_categorical
 from keras_preprocessing.image import load_img
 
-IMAGE_PATH = "data/Emotion"
-OUTPUT_PATH = 'data/output/'
+DATASET_PATH = "data/ck"
+IMAGE_PATH = DATASET_PATH + "/cohn-kanade-images"
+EMOTION_PATH = DATASET_PATH + "/Emotion"
+
 
 def get_dataset():
-    labels, imgs = load_images(IMAGE_PATH)
-    return labels, imgs
+    return load_images(DATASET_PATH + "/Emotion")
 
 
 def load_images(startpath):
@@ -20,23 +21,22 @@ def load_images(startpath):
     for paths, dirs, files in os.walk(startpath):
         for f in files:
             fullpath = os.path.join(paths, f)
-            label, paths = get_label_path(fullpath, f)
-            for path in paths:
-                img_labels.append(to_categorical(label, 8))
-                imgs.append(load_and_preprocess_image(path))
+            label = get_label(fullpath)
+            img_labels.append(label)
+            image_path = get_image_file_path(fullpath, f)
+            imgs.append(load_and_preprocess_image(image_path))
     return np.array(img_labels), np.array(imgs)
 
 
-def get_label_path(path, filename):
-    image_path = OUTPUT_PATH + filename.replace('_emotion.txt', '.png')
-    image_path_t = image_path.replace('.png', '_translated.png')
-    image_path_m = image_path.replace('.png', '_mirrored.png')
-    image_path_r = image_path.replace('.png', '_rotated.png')
-
-    fp = open(path, "r")
+def get_label(label_path):
+    fp = open(label_path, "r")
     label = int(float(fp.readline()))
     fp.close()
-    return label, [image_path, image_path_m, image_path_r, image_path_t]
+    return to_categorical(label, 8)
+
+
+def get_image_file_path(label_file_path, label_filename):
+    return label_file_path.replace(EMOTION_PATH, IMAGE_PATH) + label_filename.replace("_emotion.txt", "png")
 
 
 def load_and_preprocess_image(path):
