@@ -49,15 +49,3 @@ def random_shapes(source_image):
 
 
 ops = [translate, rotate, mirror, random_shapes]
-
-
-def generate_random_changes_pipe(number_of_steps):
-    pipeline = []
-    for _ in number_of_steps:
-        pipeline.append(ops[random.randint(0, len(ops) - 1)])
-    return pipeline
-
-
-def execute_pipe(source_img, pipe):
-    for op in pipe:
-        source_img = op(source_img)
