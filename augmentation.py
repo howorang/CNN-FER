@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from augmentation_ops import ops
 
 NUMBER_OF_AUGMENTATION_STEPS = 3
@@ -7,12 +9,14 @@ NUMBER_OF_AUGMENTATION_STEPS = 3
 
 def augment_random_images_randomly(labels, imgs, target_count):
     count = len(labels)
+    tmp_labels = labels.tolist()
+    tmp_imgs = imgs.tolist()
     for i in range(count, target_count):
         label, img = choose_random_image(labels, imgs)
         augmented_img = augment_randomly(img)
-        labels.append(label)
-        imgs.append(augmented_img)
-    return labels, imgs
+        tmp_labels.append(label)
+        tmp_imgs.append(augmented_img)
+    return np.array(tmp_labels), np.array(tmp_imgs)
 
 
 def choose_random_image(labels, imgs):
