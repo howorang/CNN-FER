@@ -3,7 +3,7 @@ import random
 import cv2
 import numpy as np
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 
 def mirror(source_image):
@@ -18,7 +18,7 @@ def mirror(source_image):
 
 
 def rotate(source_image):
-    degrees = random.randint(0, 7) * (-1 if random.randint(0, 1) == 0 else 1)
+    degrees = random.randint(3, 7) * (-1 if random.randint(0, 1) == 0 else 1)
     height = source_image.shape[0]
     width = source_image.shape[1]
     rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), degrees, 1)
@@ -32,8 +32,8 @@ def rotate(source_image):
 
 
 def translate(source_image):
-    x = random.randint(0, 10)
-    y = random.randint(0, 10)
+    x = random.randint(5, 20)
+    y = random.randint(5, 20)
     M = np.float32([[1, 0, x], [0, 1, y]])
     height = source_image.shape[0]
     width = source_image.shape[1]
@@ -48,7 +48,7 @@ def translate(source_image):
 
 def random_shapes(source_image):
     channged_picture = source_image.copy()
-    shape_size = random.randint(1, 20)
+    shape_size = random.randint(10, 30)
     height = channged_picture.shape[0]
     width = channged_picture.shape[1]
     if random.randint(0, 1) == 0:

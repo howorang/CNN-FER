@@ -43,13 +43,8 @@ def load_and_preprocess_image(path):
     image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = crop_face(image)
+    image = cv2.resize(image, (192, 192))
     return image
-
-
-def preprocess_image(image):
-    img = cv2.resize(image, (192, 192))
-    img = np.divide(img, 255)
-    return img
 
 
 def crop_face(source_image):
