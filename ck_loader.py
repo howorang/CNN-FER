@@ -2,14 +2,13 @@ import os
 
 import cv2
 import numpy as np
-from keras.preprocessing.image import img_to_array
-from keras.preprocessing.image import load_img
 from keras.utils import to_categorical
-from keras_preprocessing.image import load_img
 
 DATASET_PATH = "data/ck"
 IMAGE_PATH = DATASET_PATH + "/cohn-kanade-images"
 EMOTION_PATH = DATASET_PATH + "/Emotion"
+
+faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 
 def get_dataset():
@@ -42,10 +41,19 @@ def get_image_file_path(label_file_path):
 
 def load_and_preprocess_image(path):
     image = cv2.imread(path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = crop_face(image)
     return image
 
 
-# def preprocess_image(image):
-#     img = cv2.resize(image, (192, 192))
-#     img = np.divide(img, 255)
-#     return img
+def preprocess_image(image):
+    img = cv2.resize(image, (192, 192))
+    img = np.divide(img, 255)
+    return img
+
+
+def crop_face(source_image):
+    faces = faceCascade.detectMultiScale(source_image, 1.1, 3, minSize=(100, 100))
+    for (x, y, w, h) in faces:
+        crop_img = source_image[y:y + h, x:x + w]
+        return crop_img

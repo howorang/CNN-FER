@@ -7,8 +7,7 @@ DEBUG_MODE = True
 
 
 def mirror(source_image):
-    height, width, channels = source_image.shape
-    mirrored_image = np.zeros((height, width, 3), np.uint8)
+    mirrored_image = source_image.copy()
     cv2.flip(source_image, 1, mirrored_image)
     if DEBUG_MODE:
         cv2.imshow('unmirrored', source_image)
@@ -20,7 +19,8 @@ def mirror(source_image):
 
 def rotate(source_image):
     degrees = random.randint(0, 7) * (-1 if random.randint(0, 1) == 0 else 1)
-    height, width, channels = source_image.shape
+    height = source_image.shape[0]
+    width = source_image.shape[1]
     rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), degrees, 1)
     rotated_image = cv2.warpAffine(source_image, rotation_matrix, (width, height))
     if DEBUG_MODE:
@@ -35,7 +35,8 @@ def translate(source_image):
     x = random.randint(0, 10)
     y = random.randint(0, 10)
     M = np.float32([[1, 0, x], [0, 1, y]])
-    height, width, channels = source_image.shape
+    height = source_image.shape[0]
+    width = source_image.shape[1]
     translated_image = cv2.warpAffine(source_image, M, (width, height))
     if DEBUG_MODE:
         cv2.imshow('untranslated', source_image)
@@ -48,7 +49,8 @@ def translate(source_image):
 def random_shapes(source_image):
     channged_picture = source_image.copy()
     shape_size = random.randint(1, 20)
-    height, width, channels = channged_picture.shape
+    height = channged_picture.shape[0]
+    width = channged_picture.shape[1]
     if random.randint(0, 1) == 0:
         cv2.circle(img=channged_picture,
                    center=(random.randint(0, width - shape_size), random.randint(0, height - shape_size)),
