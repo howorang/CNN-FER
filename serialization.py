@@ -19,5 +19,5 @@ def load_dataset(path):
     f.close()
     if len(imgs.shape) == 3:
         resotred_shape = imgs.shape + (1,)
-        images = np.reshape(imgs, resotred_shape)
+        imgs = np.reshape(imgs, resotred_shape)
     return labels, imgs
