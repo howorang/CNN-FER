@@ -1,10 +1,12 @@
 import random
 
+import cv2
 import numpy as np
 
 from augmentation_ops import ops
 
 NUMBER_OF_AUGMENTATION_STEPS = 3
+faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 
 def augment_random_images_randomly(labels, imgs, target_count):
@@ -41,3 +43,18 @@ def execute_pipe(source_img, pipe):
     for op in pipe:
         source_img = op(source_img)
     return source_img
+
+
+def load_and_preprocess_image(path):
+    image = cv2.imread(path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = crop_face(image)
+    image = cv2.resize(image, (192, 192))
+    return image
+
+
+def crop_face(source_image):
+    faces = faceCascade.detectMultiScale(source_image, 1.1, 3, minSize=(100, 100))
+    for (x, y, w, h) in faces:
+        crop_img = source_image[y:y + h, x:x + w]
+        return crop_img
