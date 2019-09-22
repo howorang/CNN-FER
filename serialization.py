@@ -1,6 +1,7 @@
 import datetime
 
 import h5py
+import numpy as np
 
 
 def save_dataset(path, labels, imgs):
@@ -16,4 +17,7 @@ def load_dataset(path):
     labels = f['labels'].value
     imgs = f['imgs'].value
     f.close()
+    if len(imgs.shape) == 3:
+        resotred_shape = imgs.shape + (1,)
+        images = np.reshape(imgs, resotred_shape)
     return labels, imgs

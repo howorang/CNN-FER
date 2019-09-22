@@ -85,10 +85,6 @@ def create_model():
 
 
 labels, images = load_dataset('example20190922183246')
-
-if len(images.shape) == 3:
-    resotred_shape = images.shape + (1,)
-    images = np.reshape(images, resotred_shape)
 # if 1 channel dataset
 
 images, X_test, labels, y_test = train_test_split(images, labels, test_size=0.15)
