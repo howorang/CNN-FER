@@ -49,7 +49,7 @@ def load_and_preprocess_image(path):
     image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = crop_face(image)
-    image = cv2.resize(image, (192, 192))
+    image = cv2.resize(image, (224, 224))
     return image
 
 
