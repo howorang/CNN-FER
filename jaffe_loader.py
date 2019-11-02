@@ -9,8 +9,6 @@ from augmentation import load_and_preprocess_image
 DATASET_PATH = "data/jaffe"
 EXCLUDE_FEAR = True
 
-faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
 labels = {
     'HA': 0,
     'SA': 1,
@@ -35,6 +33,8 @@ def load_images(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
             label = get_label(filename)
+            if EXCLUDE_FEAR and label[5] == 0:
+                continue
             img_labels.append(label)
             imgs.append(load_and_preprocess_image(fullpath))
     return np.array(img_labels), np.array(imgs)
