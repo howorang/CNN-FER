@@ -3,7 +3,7 @@ import random
 import cv2
 import numpy as np
 
-from augmentation_ops import ops
+from augmentation_ops import ops, AugmentationOp, rotate, mirror, translate, insert_shape
 
 NUMBER_OF_AUGMENTATION_STEPS = 3
 faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -58,3 +58,16 @@ def crop_face(source_image):
     for (x, y, w, h) in faces:
         crop_img = source_image[y:y + h, x:x + w]
         return crop_img
+
+
+def execute_augmentation(source_image, augmentation):
+    switcher = {
+        AugmentationOp.ROTATION: lambda params, img: rotate(params['degrees'], img),
+        AugmentationOp.MIRROR: lambda params, img: mirror(img),
+        AugmentationOp.TRANSLATION: lambda params, img: translate(params['x'], params['y'], img),
+        AugmentationOp.RANDOM_SHAPE: lambda params, img: insert_shape(params['x'], params['y'], params['shape_size'],
+                                                                      params['b'], params['g'], params['r'],
+                                                                      params['shape'],
+                                                                      img)
+    }
+    return switcher[augmentation.operation](augmentation.params, source_image)

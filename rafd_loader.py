@@ -27,24 +27,25 @@ labels = {
 # 7 categories
 
 def get_dataset():
-    return load_images(DATASET_PATH)
+    return _load_images(DATASET_PATH)
 
 
-def get_image_handles(startpath):
+def get_image_handles():
+    startpath = DATASET_PATH
     handles = []
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
-            metadata = get_metadata(filename)
+            metadata = _get_metadata(filename)
             emotion_label = metadata['emotion']
-            if (EXCLUDE_NEUTRAL and emotion_label == 'neutral') or (to_universal_label(emotion_label) is None):
+            if (EXCLUDE_NEUTRAL and emotion_label == 'neutral') or (_to_universal_label(emotion_label) is None):
                 continue
             handles.append(
-                ImageHandle(Dataset.RAFD, metadata['model'], to_universal_label(emotion_label), fullpath, []))
+                ImageHandle(Dataset.RAFD, metadata['model'], _to_universal_label(emotion_label), fullpath, []))
     return handles
 
 
-def to_universal_label(label):
+def _to_universal_label(label):
     label_to_universal = {
         0: Emotion.ANGRY,
         1: None,  # CONTEMPTUOUS
@@ -58,13 +59,13 @@ def to_universal_label(label):
     return label_to_universal[label]
 
 
-def load_images(startpath):
+def _load_images(startpath):
     imgs = []
     img_labels = []
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
-            metadata = get_metadata(filename)
+            metadata = _get_metadata(filename)
             if EXCLUDE_NEUTRAL and metadata['emotion'] == 'neutral':
                 continue
             img_labels.append(to_categorical(labels[metadata['emotion']]))
@@ -72,7 +73,7 @@ def load_images(startpath):
     return np.array(img_labels), np.array(imgs)
 
 
-def get_metadata(filename):
+def _get_metadata(filename):
     search_result = LABEL_RE.search(filename)
     return {
         'dataset': 'rafd',

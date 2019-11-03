@@ -24,23 +24,24 @@ labels = {
 # 7 categories
 
 def get_dataset():
-    return load_images(DATASET_PATH)
+    return _load_images(DATASET_PATH)
 
 
-def get_image_handles(startpath):
+def get_image_handles():
+    startpath = DATASET_PATH
     handles = []
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
-            label = get_label(filename)
-            if (EXCLUDE_FEAR and label[5] == 0) or (to_universal_label(label) is None):
+            label = _get_label(filename)
+            if (EXCLUDE_FEAR and label[5] == 0) or (_to_universal_label(label) is None):
                 continue
             handles.append(
-                ImageHandle(Dataset.JAFFE, get_metadata(filename)['model'], to_universal_label(label), fullpath, []))
+                ImageHandle(Dataset.JAFFE, _get_metadata(filename)['model'], _to_universal_label(label), fullpath, []))
     return handles
 
 
-def to_universal_label(label):
+def _to_universal_label(label):
     label_to_universal = {
         0: Emotion.HAPPY,
         1: Emotion.SAD,
@@ -53,14 +54,14 @@ def to_universal_label(label):
     return label_to_universal[label]
 
 
-def load_images(startpath):
+def _load_images(startpath):
     imgs = []
     img_labels = []
     arr_metadata = []
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
-            label = get_label(filename)
+            label = _get_label(filename)
             if EXCLUDE_FEAR and label[5] == 0:
                 continue
             img_labels.append(label)
@@ -68,12 +69,12 @@ def load_images(startpath):
     return np.array(img_labels), np.array(imgs), np.array(arr_metadata)
 
 
-def get_label(filename):
+def _get_label(filename):
     label = labels[filename[3:5]]
     return to_categorical(label, 7)
 
 
-def get_metadata(filename):
+def _get_metadata(filename):
     return {
         'dataset': 'jaffe',
         'model': filename[0:2],
