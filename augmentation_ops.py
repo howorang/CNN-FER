@@ -1,9 +1,17 @@
 import random
+from enum import Enum
 
 import cv2
 import numpy as np
 
 DEBUG_MODE = False
+
+
+class AugmentationOp(Enum):
+    ROTATION = 1,
+    MIRROR = 2,
+    TRANSLATION = 3,
+    RANDOM_SHAPE = 4
 
 
 def mirror(source_image):
