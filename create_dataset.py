@@ -5,6 +5,6 @@ from jaffe_loader import get_dataset
 from serialization import save_dataset
 
 labels, imgs = get_dataset()
-labels, imgs = augment_random_images_randomly(labels, imgs, 1000)
+labels, imgs = augment_random_images_randomly(labels, imgs, 2000)
 imgs = np.divide(imgs, 255)
-save_dataset("example", labels, imgs)
+save_dataset("jaffe", labels, imgs)

@@ -8,6 +8,7 @@ from tensorflow import keras
 
 from resnet import resnet50
 from serialization import load_dataset
+from vgg19 import vgg19
 
 IMAGE_PATH = "data/Emotion"
 OUTPUT_PATH = 'data/output/'
@@ -15,7 +16,7 @@ OUTPUT_PATH = 'data/output/'
 
 
 
-labels, images = load_dataset('example20190925180901')
+labels, images = load_dataset('jaffe20190925225537')
 # if 1 channel dataset
 
 
@@ -37,8 +38,8 @@ logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
 print(logdir)
 
-model = resnet50()
-model.compile(optimizer=keras.optimizers.Adam(),
+model = vgg19()
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 

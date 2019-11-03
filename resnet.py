@@ -143,7 +143,7 @@ def resnet50():
 
 
     x = layers.GlobalAveragePooling2D(name='avg_pool')(x)
-    x = layers.Dense(8, activation='softmax', name='fc1000')(x)
+    x = layers.Dense(7, activation='softmax', name='fc1000')(x)
 
 
 
