@@ -8,9 +8,9 @@ DEBUG_MODE = False
 
 
 class AugmentationOp(Enum):
-    ROTATION = 1,
-    MIRROR = 2,
-    TRANSLATION = 3,
+    ROTATION = 1
+    MIRROR = 2
+    TRANSLATION = 3
     RANDOM_SHAPE = 4
 
 
@@ -82,4 +82,4 @@ def random_shapes(source_image):
     return channged_picture
 
 
-ops = [translate, rotate, mirror, random_shapes]
+ops = [translate, rotate, mirror]

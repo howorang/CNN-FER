@@ -47,14 +47,14 @@ def get_image_handles():
 
 def to_universal_label(label):
     label_to_universal = {
-        0: Emotion.ANGRY,
-        1: None,  # CONTEMPTUOUS
-        2: Emotion.DISGUSTED,
-        3: Emotion.FEARFUL,
-        4: Emotion.HAPPY,
-        5: None,  # NEUTRAL
-        6: Emotion.SURPRISED,
-        7: Emotion.SAD
+        'angry': Emotion.ANGRY,
+        'contemptuous': None,  # CONTEMPTUOUS
+        'disgusted': Emotion.DISGUSTED,
+        'fearful': Emotion.FEARFUL,
+        'happy': Emotion.HAPPY,
+        'neutral': None,  # NEUTRAL
+        'surprised': Emotion.SURPRISED,
+        'sad': Emotion.SAD
     }
     return label_to_universal[label]
 

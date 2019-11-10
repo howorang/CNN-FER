@@ -5,8 +5,8 @@ from augmentation_ops import AugmentationOp
 
 
 class Dataset(Enum):
-    CK = 1,
-    JAFFE = 2,
+    CK = 1
+    JAFFE = 2
     RAFD = 3
 
 
@@ -15,11 +15,11 @@ class Dataset(Enum):
 # contemptuous and neutral
 
 class Emotion(Enum):
-    ANGRY = 1,
-    DISGUSTED = 2,
-    FEARFUL = 3,
-    SURPRISED = 4,
-    SAD = 5,
+    ANGRY = 1
+    DISGUSTED = 2
+    FEARFUL = 3
+    SURPRISED = 4
+    SAD = 5
     HAPPY = 6
 
 
@@ -35,4 +35,4 @@ class ImageHandle:
     emotion: Emotion
     path: str
     augmentations: []
-    was_used: bool
+    was_used: bool = False

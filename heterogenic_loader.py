@@ -3,7 +3,7 @@
 import numpy as np
 
 from ImageHandle import Emotion
-from random import random
+import random
 from augmentation import load_and_preprocess_image, augment_randomly
 
 

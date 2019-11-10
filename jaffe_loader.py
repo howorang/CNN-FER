@@ -6,9 +6,10 @@ from keras.utils import to_categorical
 
 from ImageHandle import ImageHandle, Dataset, Emotion
 from augmentation import load_and_preprocess_image
+from utility_functions import from_categorigical_to_int
 
 DATASET_PATH = "data/jaffe"
-EXCLUDE_FEAR = True
+EXCLUDE_FEAR = False
 
 labels = {
     'HA': 0,
@@ -34,7 +35,7 @@ def get_image_handles():
         for filename in files:
             fullpath = os.path.join(paths, filename)
             label = get_label(filename)
-            if (EXCLUDE_FEAR and label[5] == 0) or (to_universal_label(label) is None):
+            if (EXCLUDE_FEAR and label == 5) or (to_universal_label(label) is None):
                 continue
             handles.append(
                 ImageHandle(Dataset.JAFFE, get_metadata(filename)['model'], to_universal_label(label), fullpath, []))
@@ -61,7 +62,7 @@ def load_images(startpath):
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
             fullpath = os.path.join(paths, filename)
-            label = get_label(filename)
+            label = to_categorical(get_label(filename), 7)
             if EXCLUDE_FEAR and label[5] == 0:
                 continue
             img_labels.append(label)
@@ -70,8 +71,7 @@ def load_images(startpath):
 
 
 def get_label(filename):
-    label = labels[filename[3:5]]
-    return to_categorical(label, 7)
+    return labels[filename[3:5]]
 
 
 def get_metadata(filename):
