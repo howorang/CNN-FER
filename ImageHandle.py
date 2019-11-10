@@ -35,3 +35,4 @@ class ImageHandle:
     emotion: Emotion
     path: str
     augmentations: []
+    was_used: bool

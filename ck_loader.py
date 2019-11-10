@@ -18,7 +18,8 @@ def get_dataset():
     return load_images(DATASET_PATH + "/Emotion")
 
 
-def get_image_handles(startpath):
+def get_image_handles():
+    startpath = DATASET_PATH + "/Emotion"
     handles = []
     for paths, dirs, files in os.walk(startpath):
         for f in files:
@@ -28,7 +29,7 @@ def get_image_handles(startpath):
             if to_universal_label(label) is None:
                 continue
             handles.append(ImageHandle(Dataset.CK, '', to_universal_label(label), image_path, []))
-    return handles
+    return Dataset.CK, handles
 
 def load_images(startpath):
     imgs = []

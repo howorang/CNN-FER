@@ -30,7 +30,8 @@ def get_dataset():
     return load_images(DATASET_PATH)
 
 
-def get_image_handles(startpath):
+def get_image_handles():
+    startpath = DATASET_PATH
     handles = []
     for paths, dirs, files in os.walk(startpath):
         for filename in files:
@@ -41,7 +42,7 @@ def get_image_handles(startpath):
                 continue
             handles.append(
                 ImageHandle(Dataset.RAFD, metadata['model'], to_universal_label(emotion_label), fullpath, []))
-    return handles
+    return Dataset.RAFD, handles
 
 
 def to_universal_label(label):
