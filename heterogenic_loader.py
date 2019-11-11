@@ -1,36 +1,42 @@
+# Equal dataset distribution
+# Equal emotion + dataset distribution
+import numpy as np
+
+from ImageHandle import Emotion
 import random
-
-import ck_loader
-import jaffe_loader
+from augmentation import load_and_preprocess_image, augment_randomly
 
 
-def run():
-    create_dataset([ck_loader, jaffe_loader])
-
-
-def create_dataset(dataset_loaders, target_size):
-    dataset_handles = _load_handles(dataset_loaders)
-    per_dataset_image_count = target_size / len(dataset_handles)
-    for dataset in dataset_handles.keys():
-        if len(dataset_handles[dataset]) < per_dataset_image_count:
-            new_images = _extend_dataset(dataset_handles[dataset], per_dataset_image_count)
-            dataset_handles[dataset].append(new_images)
-
-
-def _load_handles(dataset_loaders):
+def get_dataset(loaders, target_size):
     dataset_handles = {}
-    for loader in dataset_loaders:
-        handles = loader.get_image_handles()
-        dataset_handles[handles[0].dataset] = handles
-    return dataset_handles
+    target_handles = []
+    target_images = []
+    target_labels = []
+    for loader in loaders:
+        dataset, handles = loader.get_image_handles()
+        dataset_handles[dataset] = handles
+    dataset_emotions_count = target_size / len(loaders) / len(Emotion)
+    result_size = dataset_emotions_count * len(loaders) * len(Emotion)
+    i = 0
+    while i < result_size:
+        for dataset in dataset_handles.keys():
+            for emotion in list(Emotion):
+                target_handles.append(get_image(dataset, emotion, dataset_handles))
+        i += 1
+    for handle in target_handles:
+        target_images.append(augment_randomly(load_and_preprocess_image(handle.path)))
+        target_labels.append(handle.emotion.value)
+    return np.array(target_labels), np.array(target_images)
 
 
-def _extend_dataset(image_handles, per_dataset_image_count):
-    new_images = []
-    for i in range(0, per_dataset_image_count):
-        new_images.append(_get_new_image(image_handles))
-    return new_images
-
-
-def _get_new_image(image_handles):
-    image_handle = random.choice(image_handles)
+def get_image(dataset, emotion, dataset_handles):
+    handles = dataset_handles[dataset]
+    eligible_handles = [i for i in handles if (not i.was_used and i.emotion == emotion)]
+    if len(eligible_handles) > 0:
+        image = random.choice(eligible_handles)
+        image.was_used = True
+        return image
+    else:
+        for image in [i for i in handles if i.emotion == emotion]:
+            image.was_used = False
+        return get_image(dataset, emotion, dataset_handles)

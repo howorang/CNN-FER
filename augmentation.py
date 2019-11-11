@@ -5,7 +5,7 @@ import numpy as np
 
 from augmentation_ops import ops, AugmentationOp, rotate, mirror, translate, insert_shape
 
-NUMBER_OF_AUGMENTATION_STEPS = 3
+NUMBER_OF_AUGMENTATION_STEPS = 2
 faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 
