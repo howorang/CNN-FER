@@ -1,5 +1,7 @@
 # Equal dataset distribution
 # Equal emotion + dataset distribution
+import math
+
 import numpy as np
 
 from ImageHandle import Emotion
@@ -15,17 +17,20 @@ def get_dataset(loaders, target_size):
     for loader in loaders:
         dataset, handles = loader.get_image_handles()
         dataset_handles[dataset] = handles
-    dataset_emotions_count = target_size / len(loaders) / len(Emotion)
+    dataset_emotions_count = math.ceil(target_size / len(loaders) / len(Emotion))
     result_size = dataset_emotions_count * len(loaders) * len(Emotion)
     i = 0
     while i < result_size:
         for dataset in dataset_handles.keys():
             for emotion in list(Emotion):
                 target_handles.append(get_image(dataset, emotion, dataset_handles))
-        i += 1
+                i += 1
+    i = 0
     for handle in target_handles:
         target_images.append(augment_randomly(load_and_preprocess_image(handle.path)))
         target_labels.append(handle.emotion.value)
+        i += 1
+        print("Rendering " + str(i) + " out of " + str(len(target_handles)))
     return np.array(target_labels), np.array(target_images)
 
 
