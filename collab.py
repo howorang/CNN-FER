@@ -13,6 +13,10 @@ from tensorflow import keras
 import json
 from keras.utils import to_categorical
 
+from resnet import resnet50
+from serialization import load_dataset
+from vgg19 import vgg19
+
 
 class DatasetFiles(Enum):
     RAFD = 'rafd'
@@ -29,15 +33,15 @@ class Optimizer(Enum):
     LR = keras.optimizers.Adam(lr=0.00001)
 
 testing_scenerios = [
-    (Network.RESNET, DatasetFiles.RAFD, Optimizer.DEFAULT),
-    (Network.RESNET, DatasetFiles.RAFD, Optimizer.LR),
-    (Network.VGG19, DatasetFiles.RAFD, Optimizer.DEFAULT),
+    # (Network.RESNET, DatasetFiles.RAFD, Optimizer.DEFAULT),
+    # (Network.RESNET, DatasetFiles.RAFD, Optimizer.LR),
+    # (Network.VGG19, DatasetFiles.RAFD, Optimizer.DEFAULT),
 
-    (Network.RESNET, DatasetFiles.JAFFE, Optimizer.DEFAULT),
-    (Network.VGG19, DatasetFiles.JAFFE, Optimizer.DEFAULT),
-    (Network.VGG19, DatasetFiles.JAFFE, Optimizer.LR),
+    # (Network.RESNET, DatasetFiles.JAFFE, Optimizer.DEFAULT),
+    # (Network.VGG19, DatasetFiles.JAFFE, Optimizer.DEFAULT),
+    # (Network.VGG19, DatasetFiles.JAFFE, Optimizer.LR),
 
-    (Network.RESNET, DatasetFiles.HETERO, Optimizer.DEFAULT),
+    # (Network.RESNET, DatasetFiles.HETERO, Optimizer.DEFAULT),
     (Network.RESNET, DatasetFiles.HETERO, Optimizer.LR),
     (Network.VGG19, DatasetFiles.HETERO, Optimizer.DEFAULT),
     (Network.VGG19, DatasetFiles.HETERO, Optimizer.LR),
@@ -46,14 +50,13 @@ testing_scenerios = [
 ]
 
 for scenerio in testing_scenerios:
-    print("Starting " + scenerio)
-
+    print(scenerio[0].name + scenerio[1].name + scenerio[2].name)
     dataset = scenerio[1]
     network = scenerio[0]
     optimizer = scenerio[2]
 
 
-    labels, images = load_dataset('/content/drive/My Drive/ck/'+ dataset.value + '3000.h5')
+    labels, images = load_dataset(dataset.value + '3000.h5')
     # if 1 channel dataset
 
     labels = [to_categorical(i - 1, 6) for i in labels]
@@ -73,7 +76,7 @@ for scenerio in testing_scenerios:
 
     batch_size = 20
 
-    logdir = os.path.join("/content/drive/My Drive/logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S_" + network.name + "_" + dataset.name + "_" + optimizer.name))
+    logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S_" + network.name + "_" + dataset.name + "_" + optimizer.name))
     tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
     print(logdir)
 
@@ -83,8 +86,6 @@ for scenerio in testing_scenerios:
                   metrics=['accuracy'])
 
     model.summary()
-
-    %tensorboard --logdir logs
 
     history = model.fit(x=images,
                         y=labels,
@@ -101,5 +102,7 @@ for scenerio in testing_scenerios:
         batch_size=32,
         verbose=1
     )
-    # model.save('/content/drive/My Drive/logs/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%Svgg_ck3000"))
-    print(test_scalar_loss)
+    model.save(os.path.join(logdir + os.path.sep + "model"))
+    print(str(test_scalar_loss),  file=open(os.path.join(logdir + os.path.sep + "scalar.txt"), "a"))
+
+

@@ -88,7 +88,7 @@ def vgg19():
     x = layers.Flatten(name='flatten')(x)
     x = layers.Dense(4096, activation='relu', name='fc1')(x)
     x = layers.Dense(4096, activation='relu', name='fc2')(x)
-    x = layers.Dense(7, activation='softmax', name='predictions')(x)
+    x = layers.Dense(6, activation='softmax', name='predictions')(x)
 
     inputs = img_input
     # Create model.
