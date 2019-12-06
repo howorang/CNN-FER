@@ -21,6 +21,14 @@ class DatasetFiles(Enum):
     HETERO = 'hetero'
 
 
+loaded_datasets = {
+    DatasetFiles.RAFD: None,
+    DatasetFiles.CK: None,
+    DatasetFiles.JAFFE: None,
+    DatasetFiles.HETERO: None
+}
+
+
 class Network(Enum):
     VGG19 = vgg19()
     RESNET = resnet50()
@@ -37,7 +45,8 @@ HP_NETWORK = hp.HParam('network', hp.Discrete({x.name for x in list(Network)}))
 
 
 def run(run_name, hparams):
-    labels, images = load_dataset(hparams[HP_DATASET] + '3000.h5')
+   # labels, images = load_dataset(hparams[HP_DATASET] + '3000.h5')
+    labels, images = load_or_get_dataset(DatasetFiles[hparams[HP_DATASET]])
     # if 1 channel dataset
 
     labels = [to_categorical(i - 1, 6) for i in labels]
@@ -86,14 +95,27 @@ def run(run_name, hparams):
     print(str(test_scalar_loss), file=open(os.path.join(logdir + os.path.sep + "scalar.txt"), "a"))
 
 
+def load_or_get_dataset(dataset):
+    if loaded_datasets[dataset] is None:
+        loaded_datasets[dataset] = load_dataset(dataset.name + '3000.h5')
+    labels, images = loaded_datasets[dataset]
+    return labels, images
+
+
+combinations = []
+
 for dataset in HP_DATASET.domain.values:
     for network in HP_NETWORK.domain.values:
         for optimizer in HP_OPTIMIZER.domain.values:
-            hparams = {
-                HP_DATASET: dataset,
-                HP_NETWORK: network,
-                HP_OPTIMIZER: optimizer,
-            }
-            run_name = hparams[HP_DATASET] + " " + hparams[HP_NETWORK] + " " + hparams[
-                HP_OPTIMIZER] + " " + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-            run(run_name, hparams)
+            combinations.append((dataset, network, optimizer))
+start_index = 1
+for i in range(start_index, len(combinations)):
+    run_params = combinations[i]
+    hparams = {
+        HP_DATASET: run_params[0],
+        HP_NETWORK:run_params[1],
+        HP_OPTIMIZER: run_params[2],
+    }
+    run_name = hparams[HP_DATASET] + " " + hparams[HP_NETWORK] + " " + hparams[
+        HP_OPTIMIZER] + " " + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    run(run_name, hparams)
