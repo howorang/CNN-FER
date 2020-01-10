@@ -15,27 +15,27 @@ from vgg19 import vgg19
 
 
 class DatasetFiles(Enum):
-    RAFD = 'rafd'
-    CK = 'ck'
-    JAFFE = 'jaffe'
+   # RAFD = 'rafd'
+   # CK = 'ck'
+   # JAFFE = 'jaffe'
     HETERO = 'hetero'
 
 
 loaded_datasets = {
     DatasetFiles.RAFD: None,
-    DatasetFiles.CK: None,
-    DatasetFiles.JAFFE: None,
-    DatasetFiles.HETERO: None
+   # DatasetFiles.CK: None,
+   # DatasetFiles.JAFFE: None,
+   # DatasetFiles.HETERO: None
 }
 
 
 class Network(Enum):
     VGG19 = vgg19()
-    RESNET = resnet50()
+  #  RESNET = resnet50()
 
 
 class Optimizer(Enum):
-    DEFAULT = keras.optimizers.Adam()
+  #  DEFAULT = keras.optimizers.Adam()
     LR = keras.optimizers.Adam(lr=0.00001)
 
 
@@ -91,7 +91,7 @@ def run(run_name, hparams):
         batch_size=32,
         verbose=1
     )
-    model.save(os.path.join(logdir + os.path.sep + "model"))
+    model.save(os.path.join(logdir + os.path.sep + "model.h5"))
     print(str(test_scalar_loss), file=open(os.path.join(logdir + os.path.sep + "scalar.txt"), "a"))
 
 
@@ -108,7 +108,7 @@ for dataset in HP_DATASET.domain.values:
     for network in HP_NETWORK.domain.values:
         for optimizer in HP_OPTIMIZER.domain.values:
             combinations.append((dataset, network, optimizer))
-start_index = 1
+start_index = 0
 for i in range(start_index, len(combinations)):
     run_params = combinations[i]
     hparams = {
