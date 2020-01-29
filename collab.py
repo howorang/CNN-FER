@@ -13,6 +13,7 @@ from resnet import resnet50
 from serialization import load_dataset
 from vgg19 import vgg19
 
+from visualize_filters import visualize
 
 class DatasetFiles(Enum):
    # RAFD = 'rafd'
@@ -22,30 +23,32 @@ class DatasetFiles(Enum):
 
 
 loaded_datasets = {
-    DatasetFiles.RAFD: None,
+   # DatasetFiles.RAFD: None,
    # DatasetFiles.CK: None,
    # DatasetFiles.JAFFE: None,
-   # DatasetFiles.HETERO: None
+    DatasetFiles.HETERO: None
 }
 
 
 class Network(Enum):
-    VGG19 = vgg19()
-  #  RESNET = resnet50()
+   # VGG19 = vgg19()
+    RESNET = resnet50()
 
 
 class Optimizer(Enum):
-  #  DEFAULT = keras.optimizers.Adam()
-    LR = keras.optimizers.Adam(lr=0.00001)
+    DEFAULT = keras.optimizers.Adam()
+    #LR = keras.optimizers.Adam(lr=0.00001)
 
 
 HP_DATASET = hp.HParam('dataset', hp.Discrete({x.name for x in list(DatasetFiles)}))
 HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete({x.name for x in list(Optimizer)}))
 HP_NETWORK = hp.HParam('network', hp.Discrete({x.name for x in list(Network)}))
 
+def save_model(logdir, model):
+    model.save_weights(os.path.join(logdir + os.path.sep + "model_weights.h5"))
+
 
 def run(run_name, hparams):
-   # labels, images = load_dataset(hparams[HP_DATASET] + '3000.h5')
     labels, images = load_or_get_dataset(DatasetFiles[hparams[HP_DATASET]])
     # if 1 channel dataset
 
@@ -62,7 +65,6 @@ def run(run_name, hparams):
     labels = np.repeat(labels, 4, axis=0)
     images = np.repeat(images, 4, axis=0)
 
-    batch_size = 20
 
     logdir = os.path.join("logs", run_name)
 
@@ -78,9 +80,9 @@ def run(run_name, hparams):
     history = model.fit(x=images,
                         y=labels,
                         validation_split=0.15,
-                        epochs=30,
+                        epochs=2,
                         verbose=1,
-                        batch_size=32,
+                        batch_size=16,
                         shuffle=True,
                         callbacks=[tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1),
                                    hp.KerasCallback(logdir, hparams)])
@@ -91,8 +93,12 @@ def run(run_name, hparams):
         batch_size=32,
         verbose=1
     )
-    model.save(os.path.join(logdir + os.path.sep + "model.h5"))
+    save_model(logdir, model)
     print(str(test_scalar_loss), file=open(os.path.join(logdir + os.path.sep + "scalar.txt"), "a"))
+    return model
+
+
+
 
 
 def load_or_get_dataset(dataset):
@@ -118,4 +124,5 @@ for i in range(start_index, len(combinations)):
     }
     run_name = hparams[HP_DATASET] + " " + hparams[HP_NETWORK] + " " + hparams[
         HP_OPTIMIZER] + " " + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    run(run_name, hparams)
+    model = run(run_name, hparams)
+    visualize(model, 512)
